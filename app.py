@@ -12,10 +12,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# 1. 동일 폴더 내에서 가장 최신의 날짜(8자리: YYYYMMDD)를 가진 .xlsb 파일 자동 감지
+# 1. 동일 폴더 내에서 가장 최신의 날짜(8자리: YYYYMMDD)를 가진 파일 자동 감지
 @st.cache_data
 def get_latest_file():
-    pattern = "건강보험심사평가원_의료장비 상세 현황_*.xlsb"
+    pattern = "건강보험심사평가원_의료장비 상세 현황_*.xlsx"
     files = glob.glob(pattern)
     
     if not files:
@@ -23,7 +23,7 @@ def get_latest_file():
     
     file_dates = []
     for f in files:
-        match = re.search(r'_(\d{8})\.xlsb$', f)
+        match = re.search(r'_(\d{8})\.xlsx$', f)
         if match:
             file_dates.append((match.group(1), f))
             
@@ -42,17 +42,15 @@ FILE_PATH, 기준일자 = get_latest_file()
 @st.cache_data
 def load_data(file_path):
     try:
-        # xlsb 바이너리 파일 읽기를 위해 engine='pyxlsb' 지정
-        df = pd.read_excel(file_path, engine='pyxlsb')
+        df = pd.read_excel(file_path)
         df['대분류표시'] = df['장비대분류코드'].astype(str) + " - " + df['장비대분류명'].astype(str)
         df['세분류표시'] = df['장비세분류코드'].astype(str) + " - " + df['장비세분류명'].astype(str)
         return df
     except Exception as e:
-        st.error(f"파일을 읽는 중 오류가 발생했습니다: {e}")
         return None
 
 if FILE_PATH is None:
-    st.error("⚠️ '건강보험심사평가원_의료장비 상세 현황_YYYYMMDD.xlsb' 형식의 파일을 찾을 수 없습니다.")
+    st.error("⚠️ '건강보험심사평가원_의료장비 상세 현황_YYYYMMDD.xlsx' 형식의 파일을 찾을 수 없습니다.")
 else:
     df = load_data(FILE_PATH)
 
@@ -176,7 +174,7 @@ else:
                 
                 chart_width = max(800, len(chart_data) * 25)
 
-                # 1. 막대 그래프 생성 (수량 기준 내림차순 정렬: sort='-y')
+                # 1. 막대 그래프 생성 (x축 항목을 수량(-y) 기준 내림차순 정렬)
                 bars = alt.Chart(chart_data).mark_bar(color='#4c78a8').encode(
                     x=alt.X(sort_by, sort='-y', title=sort_by, axis=alt.Axis(labelAngle=-45)),
                     y=alt.Y('장비수', title='총 장비 수량'),
@@ -188,23 +186,17 @@ else:
                     align='center',
                     baseline='bottom',
                     dy=-5,
-                    fontSize=11,
-                    color='black'
+                    fontSize=11
                 ).encode(
                     text='장비수:Q'
                 )
 
-                # 3. 레이어 결합 및 터치/줌 제한(.interactive() 제거), 화면 모드 독립 시인성 설정 적용
+                # 3. 레이어 결합 및 동적 너비 적용
                 chart = alt.layer(bars, text).properties(
                     width=chart_width,
                     height=450
-                ).configure_axis(
-                    labelColor='black',
-                    titleColor='black'
-                ).configure_view(
-                    stroke=None
-                )
+                ).interactive()
 
-                st.altair_chart(chart, use_container_width=False, theme=None)
+                st.altair_chart(chart, use_container_width=False, theme="streamlit")
             else:
                 st.info("시각화할 데이터가 없습니다.")
