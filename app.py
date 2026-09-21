@@ -67,9 +67,8 @@ else:
             # 1. 의용공학팀 개발앱 바로가기
             with st.expander("📌 의용공학팀 개발앱 바로가기", expanded=False):
                 st.markdown("- [1. 의료장비 투자집행 계획 실적](https://buly.kr/DEbvdwF)")
-                st.markdown("- [2. 의료장비 현황 바로가기](https://buly.kr/7mERs3u)")
-                st.markdown("- [3. 심평원 신고 장비 상세현황](https://buly.kr/uWvRbg)")
-                st.markdown("- [4. 건강보험심사평가원 의료장비 상세현황 조회](https://buly.kr/7mERs3u)")
+                st.markdown("- [2. 인하대병원 의료장비 보유 현황](https://buly.kr/7mERs3u)")
+                st.markdown("- [3. 건강보험심사평가원 의료장비 상세현황 조회](https://buly.kr/uWvRbg)")
 
             # 2. 제작 및 문의 정보
             with st.expander("🛠️ 제작 및 문의 정보", expanded=False):
