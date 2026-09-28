@@ -64,11 +64,11 @@ else:
 
         # ================= 사이드바 구성 (접이식 메뉴 적용) =================
         with st.sidebar:
-            # 1. 의용공학팀 개발앱 바로가기
+            # 1. 의용공학팀 개발앱 바로가기[cite: 2]
             with st.expander("📌 의용공학팀 개발앱 바로가기", expanded=False):
-                st.markdown("- [1. 의료장비 투자집행 계획 실적](https://buly.kr/DEbvdwF)")
-                st.markdown("- [2. 인하대병원 의료장비 보유 현황](https://buly.kr/7mERs3u)")
-                st.markdown("- [3. 건강보험심사평가원 의료장비 상세현황 조회](https://buly.kr/uWvRbg)")
+                st.markdown("- [1. 의료장비 투자집행 계획 실적](https://buly.kr/DEbvdwF)")[cite: 1]
+                st.markdown("- [2. 인하대병원 의료장비 보유 현황](https://buly.kr/7mERs3u)")[cite: 2]
+                st.markdown("- [3. 건강보험심사평가원 의료장비 상세현황 조회](https://buly.kr/uWvRbg)")[cite: 1, 2]
 
             # 2. 제작 및 문의 정보
             with st.expander("🛠️ 제작 및 문의 정보", expanded=False):
@@ -164,13 +164,25 @@ else:
             mime="text/csv",
         )
 
-        # 📈 수량 그래프 시각화 (장비대분류가 '전체'일 경우 경고 문구 출력)
+        # 📈 장비대분류가 선택된 경우 병원별 모델별 수량 합계 표 및 시각화 제공
         st.markdown("---")
-        st.subheader(f"📊 [{sort_by}] 별 장비 수량 시각화")
-
+        
         if selected_large_category == "전체":
             st.warning("⚠️ 데이터가 방대하여 미반영-필터에서 데이터가 선택되면 표시됩니다.")
         else:
+            st.subheader("🏥 병원별·모델별 장비 수량 합계 요약 표")
+            if not filtered_df.empty:
+                # 병원(요양기관명, 요양종별) 및 모델명 기준 장비수 합계 계산
+                summary_df = filtered_df.groupby(['요양기관명', '요양종별', '모델명'])['장비수'].sum().reset_index()
+                summary_df = summary_df.rename(columns={'장비수': '총 장비수'}).sort_values(by='총 장비수', ascending=False)
+                
+                with st.container(border=True):
+                    st.dataframe(summary_df, use_container_width=True, height=300)
+            else:
+                st.info("요약할 데이터가 없습니다.")
+
+            # 📊 수량 그래프 시각화
+            st.subheader(f"📊 [{sort_by}] 별 장비 수량 시각화")
             if not filtered_df.empty:
                 chart_data = filtered_df.groupby(sort_by)['장비수'].sum().reset_index()
                 
